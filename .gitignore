@@ -1,3 +1,4 @@
 */build/*
 */googletest/*
 */*/build/*
+*/custom_target_sample/src/foo_modified.cpp
