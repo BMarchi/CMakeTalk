@@ -114,10 +114,78 @@ my_great_macro("${my_variable_to_modify}")
 
 ## Variable expansion
 
-You can expand variables by either `${my_var}` or `"${my_var}"`. (this guy explains all the different behaviors)[https://stackoverflow.com/questions/35847655/when-should-i-quote-cmake-variables]. I strongly suggest using the latter version with quotes and the usage of VERBATIM for commands.
+You can expand variables by either `${my_var}` or `"${my_var}"`. [this guy explains all the different behaviors](https://stackoverflow.com/questions/35847655/when-should-i-quote-cmake-variables). I strongly suggest using the latter version with quotes and the usage of VERBATIM for commands.
 
 ## Common functions
 
-## Author
+There are too many functions already implemented by CMake but I'll name the common ones and how to use them.
+
+### Setting a variable
+
+To create variables in CMake (or modifiy an already existing one), we use the function called `set(<variable_name> <value>)`. Variables are created in the current scope and can be accessed or written from child scopes. To override a value in a child scope, we have to use `set(<variable_name> <value> PARENT_SCOPE)`. This trick can be used for functions to modify variables outside the scope of the function.
+
+### Creating options
+
+We can specify CMake's configuration/build by using **options**. These can be declared using the `set` function like the following
+
+```
+set(MY_STRING_OPTION "DefaultValue" CACHE STRING "This variable does some magic stuff!")
+set(MY_BOOL_OPTION ON CACHE BOOL "This boolean will show something special")
+set(MY_PATH_TO_SOMETHING_GLORIOUS "." CACHE PATH "Use this type when referencing a file somewhere instead of a string!")
+```
+
+Then you can change the value of this variable by running:
+
+```
+cmake -DMY_BOOL_OPTION=OFF -DMY_STRING_OPTION="I hate default values for strings" -DMY_PATH_TO_SOMETHING_GLORIOUS="/" ../
+```
+
+### Globbing
+
+If we have a project with thousand of files, instead of listing each one, we can use `file(GLOB <output_var_name> <path_we_want_to_glob>/*.cpp)`. This will get all cpp files in the given directory and store them in `<output_var_name>`. The downside of this is that if we add new source files, CMake **won't detect them**. We will need to clear the cache and run everything again. It's not recommended to use this for source files.
+There are more parameters that can be used with file, like removing or creating directories. You can see more (in the official documentation)[https://cmake.org/cmake/help/latest/command/file.html].
+
+### Execute Process & Custom Command
+
+To run things like python scripts, shell scripts or anything outside CMake (for example, protobuff to generate messages and use that in the compilation of other libraries) exists two functions called `execute_process` and `add_custom_command`. The former works on the *compilation phase* and the latter on the *build phase*.
+
+```
+execute_process(
+  COMMAND <path_to_my_script>
+  RESULT_VARIABLE <my_variable>
+)
+
+add_custom_command(
+  COMMAND <path_to_my_script>
+  OUTPUT <my_variable>
+)
+```
+There are multiple parameters to pass to these functions that can be checked out on the official documentation. If we run execute_process, this will call the script in the *compilation phase* and will wait until it finishes. The custom command will run **if and only if** a *target* depends on the output or if we set the **POST BUILD** argument (not so recommended). You can trick the "always run custom command" by using `add_custom_target` which depends on this custom command.
+
+# CMake Phases
+
+Something to have always on mind are the phases that CMake goes through. We have the *configuration phase* (when we just simply run `cmake <path_to_root_CMakeLists>`) then the *build phase* (`cmake --build <path_to_build>`) and finally the *installation phase* (`cmake --install <path_of_build>`).
+
+## Configuration Phase
+
+As the name implies, this phase goes through all the CMakeLists sequentially and in the order they are declared (subsequents `add_subdirectory` and similars) and creates all the targets found (they **DON'T GET BUILD YET**). In this phase CMake will find syntax errors, missing files and so on.
+
+## Build Phase
+
+CMake will start compiling, running (custom commands for example) and linking all the targets declared in the order it can (meaning independent targets will come first and then targets that depend on these targets).
+
+## Installation phase
+
+In this last phase CMake will *normally* copy and/or move around files for distribution. See `INSTALL(` functions to see how it works.
+
+# TODOs for the reader since I really don't have time to cover everything (i don't know everything either)
+
+* How to install targets
+* [Generators](https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html)
+* Extending common functions
+* And many, many more functionality.
+
+
+# Author
 
 Brian Marchi
