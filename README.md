@@ -94,8 +94,29 @@ ARGN : list of variables containing only optional arguments
 ```
 
 You can also access the parameters by using `"${ARGV#}"` where # can be changed by any number. If we try to access a variable that does not exists, the behavior is undefined.
+Another relevant thing is that functions **do not have return values and also do not modify the given variables.**
 
 ## Macros
+
+Macros work almost the same as functions, with the difference that the variables passed to the arguments are modified (you can think them as a C/C++ macro)
+
+
+```
+macro(my_great_macro my_variable_to_modify)
+  message(STATUS "Value of my_variable_to_modify: "${my_variable_to_modify}"")
+  set(my_variable_to_modify "abc")
+endmacro()
+
+set(my_variable_to_modify "ABC")
+my_great_macro("${my_variable_to_modify}")
+# Here my_variable_to_modify will have the value changed to "abc"
+```
+
+## Variable expansion
+
+You can expand variables by either `${my_var}` or `"${my_var}"`. (this guy explains all the different behaviors)[https://stackoverflow.com/questions/35847655/when-should-i-quote-cmake-variables]. I strongly suggest using the latter version with quotes and the usage of VERBATIM for commands.
+
+## Common functions
 
 ## Author
 
