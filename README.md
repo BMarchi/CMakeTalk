@@ -143,7 +143,7 @@ cmake -DMY_BOOL_OPTION=OFF -DMY_STRING_OPTION="I hate default values for strings
 ### Globbing
 
 If we have a project with thousand of files, instead of listing each one, we can use `file(GLOB <output_var_name> <path_we_want_to_glob>/*.cpp)`. This will get all cpp files in the given directory and store them in `<output_var_name>`. The downside of this is that if we add new source files, CMake **won't detect them**. We will need to clear the cache and run everything again. It's not recommended to use this for source files.
-There are more parameters that can be used with file, like removing or creating directories. You can see more (in the official documentation)[https://cmake.org/cmake/help/latest/command/file.html].
+There are more parameters that can be used with file, like removing or creating directories. You can see more [in the official documentation](https://cmake.org/cmake/help/latest/command/file.html)
 
 ### Execute Process & Custom Command
 
